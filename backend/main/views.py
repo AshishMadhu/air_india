@@ -76,6 +76,61 @@ class GenerateSentenceAPIView(APIView):
             return Response(
                 {"error": "Input text is empty"}, status=status.HTTP_400_BAD_REQUEST
             )
+        if text_input == "Graph" or text_input == "graph":
+            messages.append(
+                {
+                    "user": text_input,
+                    "assistant": "#",
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            session.messages = json.dumps(messages)
+            session.save()
+            return Response("#", status=status.HTTP_200_OK)
+        elif text_input == "BarPlot":
+            messages.append(
+                {
+                    "user": text_input,
+                    "assistant": "#1",
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            session.messages = json.dumps(messages)
+            session.save()
+            return Response("#1", status=status.HTTP_200_OK)
+        elif text_input == "PiePlot":
+            messages.append(
+                {
+                    "user": text_input,
+                    "assistant": "#2",
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            session.messages = json.dumps(messages)
+            session.save()
+            return Response("#2", status=status.HTTP_200_OK)
+        elif text_input == "ScatterPlot":
+            messages.append(
+                {
+                    "user": text_input,
+                    "assistant": "#3",
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            session.messages = json.dumps(messages)
+            session.save()
+            return Response("#3", status=status.HTTP_200_OK)
+        elif text_input == "LinePlot":
+            messages.append(
+                {
+                    "user": text_input,
+                    "assistant": "#4",
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                }
+            )
+            session.messages = json.dumps(messages)
+            session.save()
+            return Response("#4", status=status.HTTP_200_OK)
         try:
             gpt_response = client.chat.completions.create(
                 model="gpt-4o-mini",

@@ -6,6 +6,7 @@ import SignupPage from "./SignupPage";
 import Bot from "./Bot";
 import { AuthProvider } from "./AuthenticationContext";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
 
 function App() {
   return (

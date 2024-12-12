@@ -8,6 +8,7 @@ import React, {
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
 import { BASE_URL } from "./constants";
+import ShowMessage from "./ShowMessage";
 
 // Define message type for type safety
 interface Message {
@@ -143,6 +144,30 @@ const ChatInterface: React.FC = () => {
     return currentChat ? currentChat.messages : [];
   };
 
+  const handlePlotSelectClick = (clicked: string) => {
+    const newMessage: Message = {
+      id: Date.now(),
+      text: clicked,
+      sender: "user",
+    };
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat.id === selectedChatId) {
+          const updatedTitle =
+            chat.messages.length === 0 ? truncateTitle(inputText) : chat.title;
+
+          return {
+            ...chat,
+            title: updatedTitle,
+            messages: [...chat.messages, newMessage],
+          };
+        }
+        return chat;
+      })
+    );
+    fetchResponse(newMessage);
+  };
+
   useEffect(() => {
     fetchChats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,7 +256,10 @@ const ChatInterface: React.FC = () => {
                           wordWrap: "break-word",
                         }}
                       >
-                        {message.text}
+                        <ShowMessage
+                          message={message.text}
+                          handlePlotSelectClick={handlePlotSelectClick}
+                        />
                       </div>
                     </div>
                   ))}
