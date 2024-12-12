@@ -4,6 +4,7 @@ from datetime import datetime
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -48,9 +49,12 @@ class GenerateSentenceAPIView(APIView):
     def post(self, request, *args, **kwargs):
         session = None
         session_id = request.data.get("session_id", None)
+        session_title = request.data.get("session_title", None)
 
         if not session_id:
-            session = models.Session.objects.create(user=request.user)
+            session = models.Session.objects.create(
+                user=request.user, title=session_title
+            )
         else:
             session = models.Session.objects.get(id=session_id)
 
@@ -97,10 +101,25 @@ class GenerateSentenceAPIView(APIView):
         messages.append(
             {
                 "user": text_input,
-                "response": response,
+                "assistant": response,
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             }
         )
         session.messages = json.dumps(messages)
         session.save()
         return Response(response, status=status.HTTP_200_OK)
+
+
+class SessionListView(ListAPIView):
+    serializer_class = serializers.SessionSerializer
+
+    def get_queryset(self):
+        return self.request.user.session_set.all()
+
+
+class MessageListView(RetrieveAPIView):
+    serializer_class = serializers.MessageSerializer
+    lookup_field = "id"
+
+    def get_queryset(self):
+        return self.request.user.session_set.filter(id=self.kwargs.get("id"))
