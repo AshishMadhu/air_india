@@ -15,9 +15,7 @@ interface ScatterGraphProps {
   title?: string;
 }
 
-const ScatterGraph: React.FC<ScatterGraphProps> = ({
-  title = "Sample Scatter Graph",
-}) => {
+const ScatterGraph: React.FC<ScatterGraphProps> = () => {
   const data = {
     datasets: [
       {
@@ -45,28 +43,9 @@ const ScatterGraph: React.FC<ScatterGraphProps> = ({
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: title,
-      },
-    },
-    scales: {
-      x: {
-        type: "linear",
-        position: "bottom",
-      },
-    },
-  };
-
   return (
     <div style={{ width: "600px", margin: "auto" }}>
-      <Scatter data={data} options={options} />
+      <Scatter data={data} />
     </div>
   );
 };
