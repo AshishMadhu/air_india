@@ -20,14 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class SessionSerializer(serializers.ModelSerializer):
-    messages = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Session
-        fields = ["id", "title", "messages"]
-
-
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Session
