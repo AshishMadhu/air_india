@@ -25,9 +25,18 @@ interface Chat {
 
 const ChatInterface: React.FC = () => {
   const token = localStorage.getItem("token");
+  const faqs = [
+    "What are your capabilities?",
+    "Can you help me write code?",
+    "Explain machine learning basics",
+    "Help me brainstorm ideas",
+    "Translate this text",
+  ];
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [inputText, setInputText] = useState<string>("");
+  const [hideFaq, setHideFaq] = useState<boolean>(false);
+  const [currentMessageCount, setCurrentMessageCount] = useState<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const truncateTitle = (text: string, maxLength: number = 20): string => {
@@ -49,11 +58,13 @@ const ChatInterface: React.FC = () => {
     }
   };
 
-  const fetchResponse = async (newMessage: Message) => {
+  const fetchResponse = async (newMessage: Message, faq: string = "") => {
     let sessionDeatils = {};
     if (selectedChatId != null && selectedChatId > 0 && selectedChatId > 1000) {
       // this means this chat is not saved on db
-      sessionDeatils = { session_title: truncateTitle(inputText) };
+      sessionDeatils = {
+        session_title: truncateTitle(inputText ? inputText : faq),
+      };
     } else {
       sessionDeatils = { session_id: selectedChatId };
     }
@@ -125,6 +136,7 @@ const ChatInterface: React.FC = () => {
       })
     );
     fetchResponse(newMessage);
+    setCurrentMessageCount(1);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -168,6 +180,30 @@ const ChatInterface: React.FC = () => {
     fetchResponse(newMessage);
   };
 
+  const handleFAQClick = (faq: string) => {
+    const newMessage: Message = {
+      id: Date.now(),
+      text: faq,
+      sender: "user",
+    };
+    setChats((prevChats) =>
+      prevChats.map((chat) => {
+        if (chat.id === selectedChatId) {
+          const updatedTitle =
+            chat.messages.length === 0 ? truncateTitle(faq) : chat.title;
+          return {
+            ...chat,
+            title: updatedTitle,
+            messages: [...chat.messages, newMessage],
+          };
+        }
+        return chat;
+      })
+    );
+    fetchResponse(newMessage, faq);
+    setHideFaq(true);
+  };
+
   useEffect(() => {
     fetchChats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -175,7 +211,6 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div className="container-fluid vh-100 d-flex">
-      {/* Sidebar */}
       <div
         className="col-3 border-end p-0 d-flex flex-column"
         style={{
@@ -193,6 +228,9 @@ const ChatInterface: React.FC = () => {
               };
               setChats((prevChats) => [...prevChats, newChat]);
               setSelectedChatId(newChat.id);
+              chats.map((c) => {
+                if (c.id == newChat.id) setCurrentMessageCount(0);
+              });
             }}
           >
             + New Chat
@@ -207,6 +245,10 @@ const ChatInterface: React.FC = () => {
               }`}
               onClick={() => {
                 setSelectedChatId(chat.id);
+                chats.map((c) => {
+                  if (c.id == chat.id)
+                    setCurrentMessageCount(chat.messages.length);
+                });
               }}
             >
               {chat.title}
@@ -215,17 +257,29 @@ const ChatInterface: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Chat Area */}
       <div className="col-9 d-flex flex-column">
+        {selectedChatId == null && (
+          <div
+            className="flex-grow-1 overflow-auto p-3 position-relative"
+            style={{ backgroundColor: "#f0f2f5" }}
+          >
+            <div className="position-absolute top-50 start-50 translate-middle text-center">
+              <img
+                src="https://www.airindia.com/content/dam/air-india/airindia-revamp/logos/AI_Logo_Red_New.svg"
+                alt="ChatGPT Logo"
+                className="mb-4"
+              />
+              <h2 className="text-muted">How can I help you today?</h2>
+            </div>
+          </div>
+        )}
         {selectedChatId !== null && (
           <>
-            {/* Messages Area */}
             <div
               className="flex-grow-1 overflow-auto p-3 position-relative"
               style={{ backgroundColor: "#f0f2f5" }}
             >
               {getCurrentChatMessages().length === 0 ? (
-                // Logo/Welcome Screen within Messages Area
                 <div className="position-absolute top-50 start-50 translate-middle text-center">
                   <img
                     src="https://www.airindia.com/content/dam/air-india/airindia-revamp/logos/AI_Logo_Red_New.svg"
@@ -267,8 +321,23 @@ const ChatInterface: React.FC = () => {
                 </div>
               )}
             </div>
-
-            {/* Input Area */}
+            {!hideFaq && currentMessageCount == 0 && (
+              <div className="row p-2 bg-light">
+                <div className="col-12">
+                  <div className="d-flex flex-wrap justify-content-center">
+                    {faqs.map((faq, index) => (
+                      <button
+                        key={index}
+                        className="btn btn-outline-secondary btn-sm m-1"
+                        onClick={() => handleFAQClick(faq)}
+                      >
+                        {faq}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="row p-3 bg-white border-top">
               <div className="col-12">
                 <form onSubmit={handleSendMessage}>
