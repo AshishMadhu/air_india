@@ -215,6 +215,7 @@ const ChatInterface: React.FC = () => {
         className="col-3 border-end p-0 d-flex flex-column"
         style={{
           backgroundColor: "#f0f2f5",
+          zIndex: 10,
         }}
       >
         <div className="p-3 border-bottom">
